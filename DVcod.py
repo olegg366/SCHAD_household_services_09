@@ -37,9 +37,34 @@ gr2 = df.groupby(['климат','способ_охлаждения','спосо
 md = gr2.median()
 df['оценка_комфорта'] = df['оценка_комфорта'].fillna('md')
 
-gr1 = df.groupby(['климат',"страна"])['возраст']
-for key, item in gr1:
+#gr1 = df.groupby(['климат',"страна"])['возраст']
+#for key, item in gr1:
+  #  print(key)
+  #  print(gr1.get_group(key).value_counts(), "\n\n")
+
+gr3 = df.groupby(['город'])['пол']
+sum_soot = 0
+for key, item in gr3:
     print(key)
-    print(gr1.get_group(key).value_counts(), "\n\n")
+    print("Количество пропусков: ",gr3.get_group(key).isnull().sum().sum())
+    print(gr3.get_group(key).value_counts())
+    if key == ('Техас',):
+        print('\n\n')
+        continue
+    print('Соотношение полов: ', gr3.get_group(key).value_counts()[1]/gr3.get_group(key).value_counts()[0], "\n\n")
+    sum_soot += (gr3.get_group(key).value_counts()[1] / gr3.get_group(key).value_counts()[0])
+sr_ot = round((sum_soot/7), 2)
+print(sr_ot)
+ind = 0
+while ind < 36:
+    df.at[ind,'пол'] = 'Женский'
+    ind += 1
+while ind < 73:
+    df.at[ind,'пол'] = 'Мужской'
+    ind += 1
+for key, item in gr3:
+    print(key)
+    print("Количество пропусков: ",gr3.get_group(key).isnull().sum().sum())
+    print(gr3.get_group(key).value_counts(),'\n\n')
 
 #check_data(df)
