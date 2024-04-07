@@ -56,7 +56,7 @@ for key, item in gr3:
 sr_ot = round((sum_soot/7), 2)
 print(sr_ot)
 ind = 0
-while ind < 36:
+while ind < 24:
     df.at[ind,'пол'] = 'Женский'
     ind += 1
 while ind < 73:
