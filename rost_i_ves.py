@@ -24,7 +24,6 @@ for key, item in gb2:
 
 
 df['ощущение_движения_воздуха_(bool)'] = pd.array(df['ощущение_движения_воздуха_(bool)'], dtype=pd.Int64Dtype())
-df['вес'] = pd.array(df['вес'], dtype=pd.Int64Dtype())
 df['занавески'] = pd.array(df['занавески'], dtype=pd.Int64Dtype())
 df['вентилятор'] = pd.array(df['вентилятор'], dtype=pd.Int64Dtype())
 df['окно'] = pd.array(df['окно'], dtype=pd.Int64Dtype())
