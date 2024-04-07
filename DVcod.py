@@ -33,12 +33,13 @@ def check_data(data_df):
 df['режим_при_смешанном_типе_охлаждения'] = df['режим_при_смешанном_типе_охлаждения'].fillna('нет')
 df['способ_обогрева'] = df['способ_обогрева'].fillna('нет')
 
-#gr1 = df.groupby(['климат'])['возраст']
-#for key, item in gr1:
- #   print(key)
- #   print(gr1.get_group(key).value_counts(), "\n\n")
-
-gr2 = df.groupby([['климат'],['способ_охлаждения'],['способ_обогрева']])['оценка_комфорта']
+gr2 = df.groupby(['климат','способ_охлаждения','способ_обогрева'])['оценка_комфорта']
 md = gr2.median()
+df['оценка_комфорта'] = df['оценка_комфорта'].fillna('md')
+
+gr1 = df.groupby(['климат',"страна"])['возраст']
+for key, item in gr1:
+    print(key)
+    print(gr1.get_group(key).value_counts(), "\n\n")
 
 #check_data(df)
