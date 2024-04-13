@@ -68,3 +68,5 @@ for key, item in gr3:
     print(gr3.get_group(key).value_counts(),'\n\n')
 
 #check_data(df)
+
+#sususuusususuusu
