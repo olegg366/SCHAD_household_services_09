@@ -61,52 +61,39 @@ for i in cols:
         #if not nulli and not nullj:
         shapii = None
         shapij = None
-        print(i, j)
-        print()
+        print(i, j, '\n')
         if type(df[i][0]) is np.float64:
             shapii = shapiro(df[i])[1]
         if type(df[j][0]) is np.float64:
             shapij = shapiro(df[j])[1]
         if (shapii is not None and shapij is None) or (shapii is None and shapij is not None):
-            
-            if shapii is not None:
-                le1 = le.fit_transform(df[j])
-                if shapii < 0.05:
-                    
-                    stu = ttest_ind(df[i], le1, nan_policy='omit')
-                    print(f'corr: {stu.statistic}')
-                    print(f'pvalue: {stu.pvalue}')
-                else:
-                    mann = mannwhitneyu(df[[i]], df[[j]], nan_policy='omit')
-                    print(f'corr: {mann.statistic}')
-                    print(f'pvalue: {mann.pvalue}')
-                    
+            if (shapii and shapii < 0.05) or (shapij and shapij < 0.05):
+                stu = ttest_ind(df[i], df[j], nan_policy='omit')
+                print('Method: Student')
+                print(f'corr: {stu.statistic}')
+                print(f'pvalue: {stu.pvalue}')
             else:
-                le2 = le.fit_transform(df[i])
-                if shapij < 0.05:
-                    stu = ttest_ind(le2, df[j], nan_policy='omit')
-                    print(f'corr: {stu.statistic}')
-                    print(f'pvalue: {stu.pvalue}')
-                else:
-                    mann = mannwhitneyu(df[i], df[j], nan_policy='omit')
-                    print(f'corr: {mann.statistic}')
-                    print(f'pvalue: {mann.pvalue}')
-            
-                    
-        if shapii is not None and shapij is not None:
+                mann = mannwhitneyu(df[i], df[j], nan_policy='omit')
+                print('Method: Mann-Whitneyu')
+                print(f'corr: {mann.statistic}')
+                print(f'pvalue: {mann.pvalue}')           
+        elif shapii is not None and shapij is not None:
             if shapii < 0.05 or shapij < 0.05:
                 nas = np.logical_or(df[i].isna(), df[j].isna())
                 pear = pearsonr(df[i][~nas], df[j][~nas])
                 #pear = pearsonr(df[i], df[j])
+                print('Method: Pearson')
                 print(f'corr: {pear.statistic}')
                 print(f'pvalue: {pear.pvalue}')
             else:
                 spear = spearmanr(df[i], df[j], nan_policy='omit')
+                print('Method: Spearman')
                 print(f'corr: {spear.statistic}')
                 print(f'pvalue: {spear.pvalue}')
-        if shapii is None and shapij is None:
+        else:
             crosschi = pd.crosstab(df[i], df[j])
             chi = chi2_contingency(crosschi)
+            print('Method: chi2')
             print(f'corr: {chi.statistic}')
             print(f'pvalue: {chi.pvalue}')
         print()
