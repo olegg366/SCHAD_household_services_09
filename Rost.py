@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from scipy.stats import spearmanr, shapiro, pearsonr, ttest_ind, mannwhitneyu, chi2_contingency
 from sklearn.preprocessing import LabelEncoder
-
+#код с корреляцией и использование функций во избежания конфликта с пустыми ячейками(не удавшийся вариант)
 le = LabelEncoder()
 def changerecl(x):
     if x <= 1:
