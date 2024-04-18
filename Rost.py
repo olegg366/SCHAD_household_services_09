@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 from scipy.stats import spearmanr, shapiro, pearsonr, ttest_ind, mannwhitneyu, chi2_contingency
 from sklearn.preprocessing import LabelEncoder
-#код с корреляцией и использование функций во избежания конфликта с пустыми ячейками(не удавшийся вариант)
+
 le = LabelEncoder()
 def changerecl(x):
     if x <= 1:
@@ -53,6 +53,9 @@ pivot = pd.pivot_table(df, index=['страна', 'пол', 'возрастна�
 
 df['стандр_комф_вл'] = df.apply(standr_comf_rh, axis=1)
 cols = list(df.columns)
+maxcorr = 0
+maxpvalue = 0
+maxij = ''
 cols.remove('Unnamed: 0')
 for i in cols:
     for j in cols[cols.index(i) + 1:]:
@@ -61,44 +64,60 @@ for i in cols:
         #if not nulli and not nullj:
         shapii = None
         shapij = None
-        print(i, j, '\n')
-        if type(df[i][0]) is np.float64:
-            shapii = shapiro(df[i])[1]
-        if type(df[j][0]) is np.float64:
-            shapij = shapiro(df[j])[1]
-        if (shapii is not None and shapij is None) or (shapii is None and shapij is not None):
-            if (shapii and shapii < 0.05) or (shapij and shapij < 0.05):
-                stu = ttest_ind(df[i], df[j], nan_policy='omit')
-                print('Method: Student')
-                print(f'corr: {stu.statistic}')
-                print(f'pvalue: {stu.pvalue}')
-            else:
-                mann = mannwhitneyu(df[i], df[j], nan_policy='omit')
-                print('Method: Mann-Whitneyu')
-                print(f'corr: {mann.statistic}')
-                print(f'pvalue: {mann.pvalue}')           
-        elif shapii is not None and shapij is not None:
-            if shapii < 0.05 or shapij < 0.05:
-                nas = np.logical_or(df[i].isna(), df[j].isna())
-                pear = pearsonr(df[i][~nas], df[j][~nas])
-                #pear = pearsonr(df[i], df[j])
-                print('Method: Pearson')
-                print(f'corr: {pear.statistic}')
-                print(f'pvalue: {pear.pvalue}')
-            else:
-                spear = spearmanr(df[i], df[j], nan_policy='omit')
-                print('Method: Spearman')
-                print(f'corr: {spear.statistic}')
-                print(f'pvalue: {spear.pvalue}')
-        else:
-            crosschi = pd.crosstab(df[i], df[j])
-            chi = chi2_contingency(crosschi)
-            print('Method: chi2')
-            print(f'corr: {chi.statistic}')
-            print(f'pvalue: {chi.pvalue}')
-        print()
-        print()            
+        dfcorr = df[[i, j]].dropna().reset_index()
+        if len(dfcorr) > 0:
+            print(i, j)
+            print()
+            if type(dfcorr[i][0]) is np.float64:
+                shapii = shapiro(dfcorr[i])[1]
+            if type(dfcorr[j][0]) is np.float64:
+                shapij = shapiro(dfcorr[j])[1]
+            if (shapii is not None and shapij is None) or (shapii is None and shapij is not None):
+                
+                if shapii is not None:
+                    le1 = le.fit_transform(dfcorr[j])
+                    if shapii < 0.05:
+                        
+                        corr = ttest_ind(dfcorr[i], le1, nan_policy='omit')
+                    else:
+                        corr = mannwhitneyu(dfcorr[[i]], dfcorr[[j]], nan_policy='omit')
+                        
+                        
+                else:
+                    le2 = le.fit_transform(dfcorr[i])
+                    if shapij < 0.05:
+                        corr = ttest_ind(le2, dfcorr[j], nan_policy='omit')
+                        
+                    else:
+                        corr = mannwhitneyu(dfcorr[i], dfcorr[j], nan_policy='omit')
+                        
+                
+                        
+            if shapii is not None and shapij is not None:
+                if shapii < 0.05 or shapij < 0.05:
+                    #nas = np.logical_or(dfcorr[i].isna(), dfcorr[j].isna())
+                    #pear = pearsonr(dfcorr[i][~nas], dfcorr[j][~nas])
+                    corr = pearsonr(dfcorr[i], dfcorr[j])
+                    
+                else:
+                    corr = spearmanr(dfcorr[i], dfcorr[j], nan_policy='omit')
+                    
+            if shapii is None and shapij is None:
+                crosschi = pd.crosstab(dfcorr[i], dfcorr[j])
+                corr = chi2_contingency(crosschi)
+            print(f'corr: {corr.statistic}')
+            print(f'pvalue: {corr.pvalue}')
             
+            print()
+            print()            
+            if corr.pvalue > maxpvalue and 'температура_воздуха_в_помещении' in i + j:
+                maxcorr = corr.statistic
+                maxpvalue = corr.pvalue
+                maxij = f'{i}, {j}'
+                
 
-
+print('Max:')
+print(maxij)
+print(maxcorr)
+print(maxpvalue)
 df.to_csv('corrected_data_categor_byRost.csv')
